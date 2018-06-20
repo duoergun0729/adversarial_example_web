@@ -95,6 +95,11 @@
                 <img :src="scope.row.img"/>
               </template>
             </el-table-column>
+            <el-table-column prop="img" label="扰动图像" min-width="40" min-height="170" align="center">
+              <template slot-scope="scope">
+                <img :src="scope.row.imgnoise"/>
+              </template>
+            </el-table-column>
             <el-table-column prop="attack_result" label="结果" min-width="22" align="center">
               <template slot-scope="scope">
                 <div class="big-size" v-html="scope.row.attack_result"></div>
@@ -184,26 +189,32 @@
         tableData: [{
           name: 'CLEAN',
           img: '',
+          imgnoise: '',
           attack_result: '',
         }, {
           name: 'FGSM',
           img: '',
+          imgnoise: '',
           attack_result: '',
         }, {
           name: 'PGD',
           img: '',
+          imgnoise: '',
           attack_result: '',
         }, {
           name: 'BIM',
           img: '',
+          imgnoise: '',
           attack_result: '',
         }, {
           name: 'MIM',
           img: '',
+          imgnoise: '',
           attack_result: '',
         }, {
           name: 'SMIM',
           img: '',
+          imgnoise: '',
           attack_result: '',
         }],
       }
@@ -233,6 +244,28 @@
           });
         }
         return (isJPG || isPNG) && isLt2M;
+      },
+      checkBackend: function () {
+        let self = this;
+        axios.post('/api_imagenet/check',
+          Qs.stringify({})
+        )
+          .then(function (response) {
+            let list = response.data;
+            console.log(list.check)
+            if (list.check === true) {
+              self.$message({
+                message: '成功连接到服务器',
+                type: 'success'
+              });
+            }
+          })
+          .catch(function (error) {
+            self.$message({
+              message: '连接服务器失败！',
+              type: 'error'
+            });
+          })
       },
       clear: function () {
         this.tableData = [{
@@ -266,7 +299,7 @@
       drawInput: function () {
         let self = this
         let tdata = []
-        if(this.imageUrl === '') {
+        if (this.imageUrl === '') {
           this.$notify.error({
             title: '错误',
             message: '必须先上传一张图片!'
@@ -296,6 +329,7 @@
                 let obj = {};
                 obj.name = list.name[_i];
                 obj.img = list.img[_i];
+                obj.imgnoise = list.imgnoise[_i];
                 obj.attack_result = list.attack_result[_i];
                 // obj.defense_result = list.defense_result[_i];
                 obj.echarts = list.echarts[_i];
@@ -1329,7 +1363,8 @@
       }
     },
     mounted() {
-      this.clear()
+      this.clear();
+      this.checkBackend();
       this.restaurants = this.loadAll();
     },
 

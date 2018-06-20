@@ -180,7 +180,8 @@ def name_to_num(name):
 def drawinput_mnist(request):
     response = {}
     input = ((255 - np.array(eval(request.POST.get('inputs')), dtype=np.float32)) / 255.0).reshape(1, 28, 28, 1)
-
+    multipleSelection = request.POST.getlist('multipleSelection', [])
+    print(multipleSelection)
     fgsm_disturb = float(request.POST.get('fgsm_disturb'))
     pgd_disturb = float(request.POST.get('pgd_disturb'))
     bim_disturb = float(request.POST.get('bim_disturb'))
@@ -305,4 +306,10 @@ def drawinput_mnist(request):
     #     str(imagenet_labels[output_bim_2[0][0] - 1]) + "<br>(" + '%.2f' % (output_bim_2[1][0] * 100) + "%)", ]
     # str(imagenet_labels[output_mim_2[0][0] - 1]) + "(" + '%.4f' % output_mim_2[1][0] + ")"]
 
+    return JsonResponse(response)
+
+
+@csrf_exempt
+def check(request):
+    response = {'check': True}
     return JsonResponse(response)

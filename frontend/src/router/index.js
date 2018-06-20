@@ -44,17 +44,6 @@ export const constantRouterMap = [
       meta: {title: '首页', icon: 'documentation', noCache: true}
     }]
   },
-  // {
-  //   path: '/documentation',
-  //   component: Layout,
-  //   redirect: '/documentation/index',
-  //   children: [{
-  //     path: 'index',
-  //     component: _import('documentation/index'),
-  //     name: 'documentation',
-  //     meta: {title: 'documentation', icon: 'documentation', noCache: true}
-  //   }]
-  // },
   {
     path: '/mnist',
     component: Layout,
@@ -66,17 +55,6 @@ export const constantRouterMap = [
       meta: {title: 'MNIST', icon: 'form', noCache: true}
     }]
   },
-  // {
-  //   path: '/mnist_dct',
-  //   component: Layout,
-  //   redirect: '/mnist_dct/index',
-  //   children: [{
-  //     path: 'index',
-  //     component: _import('mnist_dct/index'),
-  //     name: 'mnist_dct',
-  //     meta: {title: 'mnist_dct', icon: 'star', noCache: true}
-  //   }]
-  // },
   {
     path: '/cifar',
     component: Layout,
@@ -88,17 +66,6 @@ export const constantRouterMap = [
       meta: {title: 'CIFAR-10', icon: 'example', noCache: true}
     }]
   },
-  // {
-  //   path: '/cifar_dct',
-  //   component: Layout,
-  //   redirect: '/cifar_dct/index',
-  //   children: [{
-  //     path: 'index',
-  //     component: _import('cifar_dct/index'),
-  //     name: 'cifar_dct',
-  //     meta: {title: 'cifar_dct', icon: 'qq', noCache: true}
-  //   }]
-  // },
   {
     path: '/imagenet',
     component: Layout,

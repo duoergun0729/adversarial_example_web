@@ -14,3 +14,6 @@ def SSIM(x, y, model, eps=0.3, nb_iter=30, eps_iter=0.01, momentum=1):
         adv_x = adv_x + tf.clip_by_value(eps_iter * tf.sign(s), -eps, eps)
         adv_x = tf.stop_gradient(adv_x)
     return adv_x
+
+
+

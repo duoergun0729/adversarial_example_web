@@ -262,6 +262,28 @@
         }
         return (isJPG || isPNG) && isLt2M;
       },
+      checkBackend: function () {
+        let self = this;
+        axios.post('/api_cifar/check',
+          Qs.stringify({})
+        )
+          .then(function (response) {
+            let list = response.data;
+            console.log(list.check)
+            if (list.check === true) {
+              self.$message({
+                message: '成功连接到服务器',
+                type: 'success'
+              });
+            }
+          })
+          .catch(function (error) {
+            self.$message({
+                message: '连接服务器失败！',
+                type: 'error'
+              });
+          })
+      },
       clear: function () {
         this.tableData = [{
           name: 'CLEAN',
@@ -367,7 +389,8 @@
       }
     },
     mounted() {
-      this.clear()
+      this.clear();
+      this.checkBackend();
       this.restaurants = this.loadAll();
     },
 

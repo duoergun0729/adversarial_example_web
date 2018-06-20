@@ -13,20 +13,20 @@ module.exports = {
     proxyTable: {
       '/api_mnist': {
         // target: 'http://j1987010d5.51mypc.cn:44238',
-        // target: 'http://127.0.0.1:8000',
-        target: 'http://192.168.100.184:8001',
+        target: 'http://127.0.0.1:8000',
+        // target: 'http://192.168.100.184:8002',
         changeOrigin:true,
       },
       '/api_cifar': {
         // target: 'http://j1987010d5.51mypc.cn:44238',
-        // target: 'http://127.0.0.1:8000',
-        target: 'http://192.168.100.184:8001',
+        target: 'http://127.0.0.1:8000',
+        // target: 'http://192.168.100.184:8002',
         changeOrigin:true,
       },
       '/api_imagenet': {
         // target: 'http://j1987010d5.51mypc.cn:44238',
-        // target: 'http://127.0.0.1:8000',
-        target: 'http://192.168.100.184:8001',
+        target: 'http://127.0.0.1:8000',
+        // target: 'http://192.168.100.184:8002',
         changeOrigin:true,
       },
     },

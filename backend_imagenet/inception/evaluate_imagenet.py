@@ -27,7 +27,7 @@ img_list = []
 
 
 def timage():
-    for files in glob.glob('backend_imagenet/cifar/n01440764/*.JPEG'):
+    for files in glob.glob('backend_imagenet/model/n01440764/*.JPEG'):
         img = PIL.Image.open(files)
         wide = img.width > img.height
         new_w = 299 if wide else int(img.width * 299 / img.height)
@@ -179,18 +179,20 @@ y = tf.placeholder(tf.float32, (None, n_classes), name='y')
 y_t = tf.placeholder(tf.float32, (None, n_classes), name='y_t')
 x_adv = tf.placeholder(tf.float32, (None, img_size, img_size, img_chan), name='x')
 epsilon = tf.placeholder(tf.float32, ())
+iter_epsilon = tf.placeholder(tf.float32, ())
 
-data_dir = 'backend_imagenet/cifar/'
+
+data_dir = 'model/imagenet/'
 
 model = InceptionModel(num_classes)
-# cifar = Resnetv2Model(num_classes)
+# model = Resnetv2Model(num_classes)
 # model_v4 = Inceptionv4Model(num_classes)
 # model_v2 = Inceptionv2Model(num_classes)
 
 with open(os.path.join(data_dir, 'imagenet_zh_cn.json'), encoding='utf-8') as f:
     imagenet_labels = json.load(f)
 
-# with open('./backend_imagenet/cifar/imagenet.json') as f:
+# with open('./backend_imagenet/model/imagenet.json') as f:
 #     imagenet_labels = json.load(f)
 
 fgsm_params = {'eps': epsilon,
@@ -199,25 +201,25 @@ fgsm_params = {'eps': epsilon,
 
 pgd_params = {'eps': epsilon,
               'nb_iter': 10,
-              'eps_iter': .001,
+              'eps_iter': iter_epsilon,
               'clip_min': 0.,
               'clip_max': 1.}
 
 bim_params = {'eps': epsilon,
               'nb_iter': 10,
-              'eps_iter': .001,
+              'eps_iter': iter_epsilon,
               'clip_min': 0.,
               'clip_max': 1.}
 
 mim_params = {'eps': epsilon,
               'nb_iter': 10,
-              'eps_iter': .001,
+              'eps_iter': iter_epsilon,
               'clip_min': 0.,
               'clip_max': 1.}
 
 smim_params = {'eps': epsilon,
                'nb_iter': 10,
-               'eps_iter': .001,
+               'eps_iter': iter_epsilon,
                'clip_min': 0.,
                'clip_max': 1.}
 
@@ -236,7 +238,7 @@ adv_mim = mim.generate(x, **mim_params)
 smim = StochasticMomentumIterativeMethod(model)
 adv_smim = smim.generate(x, **smim_params)
 
-preds = model(x)
+preds_clean = model(x)
 preds_fgsm = model(adv_fgsm)
 preds_pgd = model(adv_pgd)
 preds_bim = model(adv_bim)
@@ -268,7 +270,7 @@ print("incv3 time" + str(end - start))
 
 
 def predict(sess, x_data):
-    yval = sess.run(preds, feed_dict={x: x_data})
+    yval = sess.run(preds_clean, feed_dict={x: x_data})
     arg = np.argsort(yval, axis=1).tolist()[0][::-1]
     val = np.sort(yval, axis=1).tolist()[0][::-1]
     return [arg, val]
@@ -281,7 +283,7 @@ def make_attack(sess, x_data, batch_size=1, ep=0.1, attack_name=None):
     for batch in range(n_batch):
         start = batch * batch_size
         end = min(n_sample, start + batch_size)
-        feed_dict = {x: x_data[start:end], epsilon: ep}
+        feed_dict = {x: x_data[start:end], epsilon: ep, iter_epsilon: ep / 10}
         if attack_name == 'fgsm':
             adv = sess.run(adv_fgsm, feed_dict=feed_dict)
         elif attack_name == 'pgd':
@@ -307,6 +309,9 @@ global imgs
 
 x_test = np.load("backend_imagenet/inception/val.npy")
 y_test = np.load("backend_imagenet/inception/y_test.npy")
+
+x_test = x_test[0:100]
+y_test = y_test[0:100]
 
 # print("attack1 start")
 # adv_fgsm1 = make_attack(sess, x_test, attack_name="fgsm")
@@ -346,23 +351,23 @@ y_test = np.load("backend_imagenet/inception/y_test.npy")
 # adv_mim1 = np.load("backend_imagenet/inception/mim_v3(0.1).npy")
 # adv_smim1 = np.load("backend_imagenet/inception/smim_v3(0.1).npy")
 
-adv_fgsm1 = np.load("backend_imagenet/inception/fgsm_v2(0.1).npy")
-adv_pgd1 = np.load("backend_imagenet/inception/pgd_v2(0.1).npy")
-adv_bim1 = np.load("backend_imagenet/inception/bim_v2(0.1).npy")
-adv_mim1 = np.load("backend_imagenet/inception/mim_v2(0.1).npy")
-adv_smim1 = np.load("backend_imagenet/inception/smim_v2(0.1).npy")
-
-eval_params = {'batch_size': 4}
-acc_fgsm = model_eval(sess, x, y, preds, X_test=adv_fgsm1, Y_test=y_test, args=eval_params)
-print(acc_fgsm)
-acc_pgd = model_eval(sess, x, y, preds, X_test=adv_pgd1, Y_test=y_test, args=eval_params)
-print(acc_pgd)
-acc_bim = model_eval(sess, x, y, preds, X_test=adv_bim1, Y_test=y_test, args=eval_params)
-print(acc_bim)
-acc_mim = model_eval(sess, x, y, preds, X_test=adv_mim1, Y_test=y_test, args=eval_params)
-print(acc_mim)
-acc_smim = model_eval(sess, x, y, preds, X_test=adv_smim1, Y_test=y_test, args=eval_params)
-print(acc_smim)
+# adv_fgsm1 = np.load("backend_imagenet/inception/fgsm_v2(0.1).npy")
+# adv_pgd1 = np.load("backend_imagenet/inception/pgd_v2(0.1).npy")
+# adv_bim1 = np.load("backend_imagenet/inception/bim_v2(0.1).npy")
+# adv_mim1 = np.load("backend_imagenet/inception/mim_v2(0.1).npy")
+# adv_smim1 = np.load("backend_imagenet/inception/smim_v2(0.1).npy")
+#
+# eval_params = {'batch_size': 4}
+# acc_fgsm = model_eval(sess, x, y, preds, X_test=adv_fgsm1, Y_test=y_test, args=eval_params)
+# print(acc_fgsm)
+# acc_pgd = model_eval(sess, x, y, preds, X_test=adv_pgd1, Y_test=y_test, args=eval_params)
+# print(acc_pgd)
+# acc_bim = model_eval(sess, x, y, preds, X_test=adv_bim1, Y_test=y_test, args=eval_params)
+# print(acc_bim)
+# acc_mim = model_eval(sess, x, y, preds, X_test=adv_mim1, Y_test=y_test, args=eval_params)
+# print(acc_mim)
+# acc_smim = model_eval(sess, x, y, preds, X_test=adv_smim1, Y_test=y_test, args=eval_params)
+# print(acc_smim)
 # adv_fgsm = make_attack(sess, x_test, attack_name="fgsm")
 # np.save("backend_imagenet/inception/fgsm_v3(0.03).npy", adv_fgsm)
 # adv_pgd = make_attack(sess, x_test, attack_name="pgd")
@@ -447,3 +452,124 @@ print(acc_smim)
 # print("mim")
 # print(end_acc - start_acc)
 # print(acc)
+
+
+accuracy_fgsm_list = []
+accuracy_pgd_list = []
+accuracy_bim_list = []
+accuracy_mim_list = []
+accuracy_smim_list = []
+ssim_fgsm_list = []
+ssim_pgd_list = []
+ssim_bim_list = []
+ssim_mim_list = []
+ssim_smim_list = []
+
+for j in range(11):
+    print(j)
+    # j = j + 1
+    eval_params = {'batch_size': 4}
+    feed = {epsilon: j * 0.005}
+    # fgsm_start = time.time()
+    # adv_fgsm_1 = make_attack(sess, x_test, ep=j*0.005, attack_name='fgsm')
+    # fgsm_end = time.time()
+    # print("fgsm" + str(fgsm_end - fgsm_start))
+    #
+    # pgd_start = time.time()
+    # adv_pgd_1 = make_attack(sess, x_test, ep=j*0.005, attack_name='pgd')
+    # pgd_end = time.time()
+    # print("pgd" + str(pgd_end - pgd_start))
+    #
+    # bim_start = time.time()
+    # adv_bim_1 = make_attack(sess, x_test, ep=j*0.005, attack_name='bim')
+    # bim_end = time.time()
+    # print("bim" + str(bim_end - bim_start))
+    #
+    # mim_start = time.time()
+    # adv_mim_1 = make_attack(sess, x_test, ep=j*0.005, attack_name='mim')
+    # mim_end = time.time()
+    # print("mim" + str(mim_end - mim_start))
+    #
+    # smim_start = time.time()
+    # adv_smim_1 = make_attack(sess, x_test, ep=j*0.005, attack_name='smim')
+    # smim_end = time.time()
+    # print("smim" + str(smim_end - smim_start))
+    #
+    # print("attack over")
+
+    # np.save('backend_imagenet/npy/fgsm_v3(' + str(j * 0.005) + ').npy', adv_fgsm_1)
+    # np.save('backend_imagenet/npy/pgd_v3(' + str(j * 0.005) + ').npy', adv_pgd_1)
+    # np.save('backend_imagenet/npy/bim_v3(' + str(j * 0.005) + ').npy', adv_bim_1)
+    # np.save('backend_imagenet/npy/mim_v3(' + str(j * 0.005) + ').npy', adv_mim_1)
+    # np.save('backend_imagenet/npy/smim_v3(' + str(j * 0.005) + ').npy', adv_smim_1)
+
+    # np.save('backend_imagenet/npy/fgsm_v2(' + str(j * 0.005) + ').npy', adv_fgsm_1)
+    # np.save('backend_imagenet/npy/pgd_v2(' + str(j * 0.005) + ').npy', adv_pgd_1)
+    # np.save('backend_imagenet/npy/bim_v2(' + str(j * 0.005) + ').npy', adv_bim_1)
+    # np.save('backend_imagenet/npy/mim_v2(' + str(j * 0.005) + ').npy', adv_mim_1)
+    # np.save('backend_imagenet/npy/smim_v2(' + str(j * 0.005) + ').npy', adv_smim_1)
+
+    # adv_fgsm_1 = np.load('backend_imagenet/npy/fgsm_v3(' + str(j * 0.005) + ').npy')
+    # adv_pgd_1 = np.load('backend_imagenet/npy/pgd_v3(' + str(j * 0.005) + ').npy')
+    # adv_bim_1 = np.load('backend_imagenet/npy/bim_v3(' + str(j * 0.005) + ').npy')
+    # adv_mim_1 = np.load('backend_imagenet/npy/mim_v3(' + str(j * 0.005) + ').npy')
+    # adv_smim_1 = np.load('backend_imagenet/npy/smim_v3(' + str(j * 0.005) + ').npy')
+
+    adv_fgsm_1 = np.load('backend_imagenet/npy/fgsm_v2(' + str(j * 0.005) + ').npy')
+    adv_pgd_1 = np.load('backend_imagenet/npy/pgd_v2(' + str(j * 0.005) + ').npy')
+    adv_bim_1 = np.load('backend_imagenet/npy/bim_v2(' + str(j * 0.005) + ').npy')
+    adv_mim_1 = np.load('backend_imagenet/npy/mim_v2(' + str(j * 0.005) + ').npy')
+    adv_smim_1 = np.load('backend_imagenet/npy/smim_v2(' + str(j * 0.005) + ').npy')
+    print("load over")
+    accuracy_fgsm = model_eval(sess, x, y, preds_clean, adv_fgsm_1, y_test, args=eval_params)
+    accuracy_pgd = model_eval(sess, x, y, preds_clean, adv_pgd_1, y_test, args=eval_params)
+    accuracy_bim = model_eval(sess, x, y, preds_clean, adv_bim_1, y_test, args=eval_params)
+    accuracy_mim = model_eval(sess, x, y, preds_clean, adv_mim_1, y_test, args=eval_params)
+    accuracy_smim = model_eval(sess, x, y, preds_clean, adv_smim_1, y_test, args=eval_params)
+    print("accuracy over")
+    accuracy_fgsm_list.append(accuracy_fgsm)
+    accuracy_pgd_list.append(accuracy_pgd)
+    accuracy_bim_list.append(accuracy_bim)
+    accuracy_mim_list.append(accuracy_mim)
+    accuracy_smim_list.append(accuracy_smim)
+    print(accuracy_fgsm_list)
+    print(accuracy_pgd_list)
+    print(accuracy_bim_list)
+    print(accuracy_mim_list)
+    print(accuracy_smim_list)
+
+    # adv_fgsm_1_gray = color.rgb2gray(adv_fgsm_1).reshape(10000, 32, 32, 1)
+    # adv_pgd_1_gray = color.rgb2gray(adv_pgd_1).reshape(10000, 32, 32, 1)
+    # adv_bim_1_gray = color.rgb2gray(adv_bim_1).reshape(10000, 32, 32, 1)
+    # adv_mim_1_gray = color.rgb2gray(adv_mim_1).reshape(10000, 32, 32, 1)
+    # adv_smim_1_gray = color.rgb2gray(adv_smim_1).reshape(10000, 32, 32, 1)
+    #
+    # ssim_fgsm = np.mean(ssim(X_test_gray * 255, adv_fgsm_1_gray * 255))
+    # ssim_pgd = np.mean(ssim(X_test_gray * 255, adv_pgd_1_gray * 255))
+    # ssim_bim = np.mean(ssim(X_test_gray * 255, adv_bim_1_gray * 255))
+    # ssim_mim = np.mean(ssim(X_test_gray * 255, adv_mim_1_gray * 255))
+    # ssim_smim = np.mean(ssim(X_test_gray * 255, adv_smim_1_gray * 255))
+    # print("ssim over")
+
+    # ssim_fgsm_list.append(float(ssim_fgsm))
+    # ssim_pgd_list.append(float(ssim_pgd))
+    # ssim_bim_list.append(float(ssim_bim))
+    # ssim_mim_list.append(float(ssim_mim))
+    # ssim_smim_list.append(float(ssim_smim))
+
+    # print(ssim_fgsm_list)
+    # print(ssim_pgd_list)
+    # print(ssim_bim_list)
+    # print(ssim_mim_list)
+    # print(ssim_smim_list)
+print()
+print(accuracy_fgsm_list)
+print(accuracy_pgd_list)
+print(accuracy_bim_list)
+print(accuracy_mim_list)
+print(accuracy_smim_list)
+# print(ssim_fgsm_list)
+# print(ssim_pgd_list)
+# print(ssim_bim_list)
+# print(ssim_mim_list)
+# print(ssim_smim_list)

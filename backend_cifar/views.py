@@ -339,3 +339,9 @@ def drawinput_cifar(request):
     # str(imagenet_labels[output_mim_2[0][0] - 1]) + "(" + '%.4f' % output_mim_2[1][0] + ")"]
 
     return JsonResponse(response)
+
+
+@csrf_exempt
+def check(request):
+    response = {'check': True}
+    return JsonResponse(response)

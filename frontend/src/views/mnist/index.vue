@@ -19,7 +19,11 @@
             <span style='margin-left:10px;'>设置参数</span>
           </div>
           <div>
-            <el-table :data="paramsData">
+            <el-table :data="paramsData" @selection-change="handleSelectionChange" ref="multipleTable">
+              <el-table-column
+                type="selection"
+                width="55">
+              </el-table-column>
               <el-table-column class="big-size" prop="name" label="方法" min-width="12" align="center">
               </el-table-column>
               <el-table-column class="big-size" prop="disturb" label="扰动" min-width="22" align="center">
@@ -105,6 +109,7 @@
     name: 'mnist',
     data() {
       return {
+        multipleSelection: [],
         restaurants: '',
         loading: false,
         isShow: false,
@@ -175,6 +180,27 @@
       BarChart
     },
     methods: {
+      checkBackend: function () {
+        let self = this;
+        axios.post('/api_mnist/check',
+          Qs.stringify({})
+        )
+          .then(function (response) {
+            let list = response.data;
+            if (list.check === true) {
+              self.$message({
+                message: '成功连接到服务器',
+                type: 'success'
+              });
+            }
+          })
+          .catch(function (error) {
+            self.$message({
+              message: '连接服务器失败！',
+              type: 'error'
+            });
+          })
+      },
       clear: function () {
         this.tableData = [{
           name: 'CLEAN',
@@ -208,21 +234,27 @@
         this.ctx.strokeRect(0, 0, 400, 400)
         this.ctx.lineWidth = 0.05
       },
+      handleSelectionChange(val) {
+        this.multipleSelection = val;
+        console.log(this.multipleSelection)
+      },
+      toggleSelection(rows) {
+        if(!rows) {
+          return ;
+        }
+        rows.forEach(row => {
+          this.$refs.multipleTable.toggleRowSelection(row);
+        });
+      },
       drawInput: function () {
         let self = this
         let tdata = []
         let img = new Image()
-        console.log("  asdf   ")
-
         img.onload = function () {
-          console.log("  asdf   ")
-
           let inputs = []
           const small = document.createElement('canvas').getContext('2d')
           small.drawImage(img, 0, 0, img.width, img.height, 0, 0, 28, 28)
           let data = small.getImageData(0, 0, 28, 28).data
-          console.log("  asdf   ")
-
           for (let i = 0; i < 28; i++) {
             for (let j = 0; j < 28; j++) {
               let n = 4 * (i * 28 + j)
@@ -232,11 +264,10 @@
           if (Math.min.apply(Math, inputs) === 255) {
             return
           }
-          console.log(inputs)
           axios.post('/api_mnist/drawinput_mnist',
             Qs.stringify({
               inputs: JSON.stringify(inputs),
-
+              multipleSelection: self.multipleSelection,
               fgsm_disturb: self.paramsData[0].disturb,
               pgd_disturb: self.paramsData[1].disturb,
               bim_disturb: self.paramsData[2].disturb,
@@ -263,10 +294,8 @@
               }
               self.tableData = tdata;
             })
-
         }
         img.src = this.$refs.main.toDataURL()
-
       },
       querySearch(queryString, cb) {
         var restaurants = this.restaurants;
@@ -300,6 +329,8 @@
     }
     ,
     mounted() {
+      this.toggleSelection(this.paramsData);
+      this.checkBackend();
       (function () {
         let _createClass = function () {
           function defineProperties(target, props) {
@@ -445,7 +476,6 @@
     flex-direction: column;
     /*background-color: rgb(240, 242, 245);*/
   }
-
 
   .box-card {
     /*width: 600px;*/

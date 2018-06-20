@@ -317,16 +317,11 @@ def drawinput_imagenet(request):
     x_adv_smim = make_attack(sess, imgs, attack_name='smim', target=name_to_num(smim_target),
                              eps=smim_disturb)
 
-    # noise_fgsm = x_adv_fgsm - imgs
-    # noise_pgd = x_adv_pgd - imgs
-    # noise_bim = x_adv_bim - imgs
-    # noise_mim = x_adv_mim - imgs
-
-    # print(imgs)
-    # print(x_adv_fgsm - imgs)
-    # print(x_adv_pgd - imgs)
-    # print(x_adv_bim - imgs)
-    # print(x_adv_mim - imgs)
+    noise_fgsm = x_adv_fgsm - imgs
+    noise_pgd = x_adv_pgd - imgs
+    noise_bim = x_adv_bim - imgs
+    noise_mim = x_adv_mim - imgs
+    noise_smim = x_adv_smim - imgs
 
     output_clean_1 = predict(sess, imgs)
     output_fgsm_1 = predict(sess, x_adv_fgsm)
@@ -355,17 +350,19 @@ def drawinput_imagenet(request):
     src_mim = 'data:image/png;base64,' + str(data_mim)
     src_smim = 'data:image/png;base64,' + str(data_smim)
 
-    # data_clean_noise = img_change_imagenet(imgs)
-    # data_fgsm_noise = img_change_imagenet(noise_fgsm * 255)
-    # data_pgd_noise = img_change_imagenet(noise_pgd * 255)
-    # data_bim_noise = img_change_imagenet(noise_bim * 255)
-    # data_mim_noise = img_change_imagenet(noise_mim * 255)
+    data_clean_noise = img_change_imagenet(imgs)
+    data_fgsm_noise = img_change_imagenet(noise_fgsm * 255)
+    data_pgd_noise = img_change_imagenet(noise_pgd * 255)
+    data_bim_noise = img_change_imagenet(noise_bim * 255)
+    data_mim_noise = img_change_imagenet(noise_mim * 255)
+    data_smim_noise = img_change_imagenet(noise_smim * 255)
 
-    # src_clean_noise = 'data:image/png;base64,' + str(data_clean_noise)
-    # src_fgsm_noise = 'data:image/png;base64,' + str(data_fgsm_noise)
-    # src_pgd_noise = 'data:image/png;base64,' + str(data_pgd_noise)
-    # src_bim_noise = 'data:image/png;base64,' + str(data_bim_noise)
-    # src_mim_noise = 'data:image/png;base64,' + str(data_mim_noise)
+    src_clean_noise = 'data:image/png;base64,' + str(data_clean_noise)
+    src_fgsm_noise = 'data:image/png;base64,' + str(data_fgsm_noise)
+    src_pgd_noise = 'data:image/png;base64,' + str(data_pgd_noise)
+    src_bim_noise = 'data:image/png;base64,' + str(data_bim_noise)
+    src_mim_noise = 'data:image/png;base64,' + str(data_mim_noise)
+    src_smim_noise = 'data:image/png;base64,' + str(data_smim_noise)
 
     echarts_attack = []
     # echarts_defense = []
@@ -397,7 +394,7 @@ def drawinput_imagenet(request):
     # response['name'] = ['clean', 'fgsm', 'pgd', 'bim', 'mim']
     # response['img'] = [src_clean, src_fgsm, src_pgd, src_bim, src_mim]
     response['img'] = [src_clean, src_fgsm, src_pgd, src_bim, src_mim, src_smim]
-    # response['imgnoise'] = [src_clean_noise, src_fgsm_noise, src_pgd_noise, src_bim_noise, src_mim_noise]
+    response['imgnoise'] = [src_clean_noise, src_fgsm_noise, src_pgd_noise, src_bim_noise, src_mim_noise, src_smim_noise]
     response['attack_result'] = [
         str(imagenet_labels[output_clean_1[0][0] - 1]) + "<br>(" + '%.2f' % (output_clean_1[1][0] * 100) + "%)",
         str(imagenet_labels[output_fgsm_1[0][0] - 1]) + "<br>(" + '%.2f' % (output_fgsm_1[1][0] * 100) + "%)",
@@ -413,4 +410,10 @@ def drawinput_imagenet(request):
     #     str(imagenet_labels[output_bim_2[0][0] - 1]) + "<br>(" + '%.2f' % (output_bim_2[1][0] * 100) + "%)", ]
     # str(imagenet_labels[output_mim_2[0][0] - 1]) + "(" + '%.4f' % output_mim_2[1][0] + ")"]
 
+    return JsonResponse(response)
+
+
+@csrf_exempt
+def check(request):
+    response = {'check': True}
     return JsonResponse(response)
