@@ -20,10 +20,10 @@
           </div>
           <div>
             <el-table :data="paramsData" @selection-change="handleSelectionChange" ref="multipleTable">
-              <el-table-column
-                type="selection"
-                width="55">
-              </el-table-column>
+              <!--<el-table-column-->
+                <!--type="selection"-->
+                <!--width="55">-->
+              <!--</el-table-column>-->
               <el-table-column class="big-size" prop="name" label="方法" min-width="12" align="center">
               </el-table-column>
               <el-table-column class="big-size" prop="disturb" label="扰动" min-width="22" align="center">
@@ -329,7 +329,7 @@
     }
     ,
     mounted() {
-      this.toggleSelection(this.paramsData);
+      // this.toggleSelection(this.paramsData);
       this.checkBackend();
       (function () {
         let _createClass = function () {

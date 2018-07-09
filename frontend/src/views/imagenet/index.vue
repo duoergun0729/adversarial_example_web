@@ -95,11 +95,11 @@
                 <img :src="scope.row.img"/>
               </template>
             </el-table-column>
-            <el-table-column prop="img" label="扰动图像" min-width="40" min-height="170" align="center">
-              <template slot-scope="scope">
-                <img :src="scope.row.imgnoise"/>
-              </template>
-            </el-table-column>
+            <!--<el-table-column prop="img" label="扰动图像" min-width="40" min-height="170" align="center">-->
+              <!--<template slot-scope="scope">-->
+                <!--<img :src="scope.row.imgnoise"/>-->
+              <!--</template>-->
+            <!--</el-table-column>-->
             <el-table-column prop="attack_result" label="结果" min-width="22" align="center">
               <template slot-scope="scope">
                 <div class="big-size" v-html="scope.row.attack_result"></div>
@@ -189,32 +189,26 @@
         tableData: [{
           name: 'CLEAN',
           img: '',
-          imgnoise: '',
           attack_result: '',
         }, {
           name: 'FGSM',
           img: '',
-          imgnoise: '',
           attack_result: '',
         }, {
           name: 'PGD',
           img: '',
-          imgnoise: '',
           attack_result: '',
         }, {
           name: 'BIM',
           img: '',
-          imgnoise: '',
           attack_result: '',
         }, {
           name: 'MIM',
           img: '',
-          imgnoise: '',
           attack_result: '',
         }, {
           name: 'SMIM',
           img: '',
-          imgnoise: '',
           attack_result: '',
         }],
       }
@@ -329,7 +323,7 @@
                 let obj = {};
                 obj.name = list.name[_i];
                 obj.img = list.img[_i];
-                obj.imgnoise = list.imgnoise[_i];
+                // obj.imgnoise = list.imgnoise[_i];
                 obj.attack_result = list.attack_result[_i];
                 // obj.defense_result = list.defense_result[_i];
                 obj.echarts = list.echarts[_i];

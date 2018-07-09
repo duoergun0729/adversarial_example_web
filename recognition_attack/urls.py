@@ -17,13 +17,13 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from django.views.generic import TemplateView
 import backend_mnist.urls
-# import backend_cifar.urls
+import backend_cifar.urls
 # import backend_imagenet.urls
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^api_mnist/', include(backend_mnist.urls)),
-    # url(r'^api_cifar/', include(backend_cifar.urls)),
+    url(r'^api_cifar/', include(backend_cifar.urls)),
     # url(r'^api_imagenet/', include(backend_imagenet.urls)),
 
     url(r'^$', TemplateView.as_view(template_name="index.html")),
